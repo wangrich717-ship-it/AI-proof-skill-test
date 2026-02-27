@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-PROOF 能力测试</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:16px;}
+:root{
+  --ink:#1C1917;--ink-2:#44403C;--ink-3:#78716C;
+  --parchment:#FAF7F2;--parchment-2:#F2EDE4;--parchment-3:#E8E0D4;
+  --ember:#C2410C;--ember-light:#EA580C;
+  --gold-grad:linear-gradient(135deg,#FFF0D6 0%,#FFE0A8 40%,#FFECC8 70%,#FFDBA0 100%);
+  --font-display:'DM Serif Display','Noto Serif SC',Georgia,serif;
+  --font-body:'DM Sans','Noto Sans SC',sans-serif;
+}
+body{font-family:var(--font-body);background:var(--parchment);color:var(--ink);line-height:1.6;min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--parchment-2);}
+::-webkit-scrollbar-thumb{background:var(--ember);border-radius:3px;}
+
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ═══════════════════════════════
+   WELCOME
+═══════════════════════════════ */
+#screen-welcome{background:var(--parchment);position:relative;overflow:hidden;}
+.welcome-bg{position:absolute;inset:0;z-index:0;overflow:hidden;}
+.welcome-bg::before{content:'';position:absolute;inset:-50%;
+  background-image:linear-gradient(var(--parchment-3) 1px,transparent 1px),linear-gradient(90deg,var(--parchment-3) 1px,transparent 1px);
+  background-size:64px 64px;animation:gridDrift 24s linear infinite;opacity:0.5;}
+.welcome-bg::after{content:'';position:absolute;width:700px;height:700px;
+  background:radial-gradient(circle,rgba(194,65,12,0.1) 0%,transparent 65%);
+  top:-10%;right:-15%;border-radius:50%;animation:glowPulse 7s ease-in-out infinite;}
+@keyframes gridDrift{0%{transform:translate(0,0);}100%{transform:translate(64px,64px);}}
+@keyframes glowPulse{0%,100%{opacity:0.6;transform:scale(1);}50%{opacity:1;transform:scale(1.08);}}
+.welcome-nav{position:relative;z-index:1;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--parchment-3);}
+.logo{font-family:var(--font-display);font-size:1.2rem;letter-spacing:0.08em;color:var(--ink);}
+.logo span{color:var(--ember);}
+.logo-badge{font-size:0.7rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);}
+.welcome-body{position:relative;z-index:1;flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 2rem;}
+.welcome-card{max-width:680px;width:100%;text-align:center;}
+.welcome-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:0.75rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--ember);margin-bottom:2rem;opacity:0;animation:fadeUp 0.7s 0.1s forwards;}
+.welcome-eyebrow::before,.welcome-eyebrow::after{content:'';display:block;width:28px;height:1.5px;background:var(--ember);}
+.welcome-card h1{font-family:var(--font-display);font-size:clamp(2.4rem,7vw,4.5rem);line-height:1.1;margin-bottom:1.5rem;opacity:0;animation:fadeUp 0.7s 0.25s forwards;}
+.welcome-card h1 em{font-style:italic;color:var(--ember);}
+.welcome-notice{background:var(--parchment-2);border:1px solid var(--parchment-3);border-radius:12px;padding:1.2rem 1.5rem;text-align:left;margin-bottom:2rem;font-size:0.88rem;color:var(--ink-2);line-height:1.65;opacity:0;animation:fadeUp 0.7s 0.4s forwards;}
+.welcome-notice strong{color:var(--ink);}
+.welcome-meta{font-size:0.9rem;color:var(--ink-3);margin-bottom:2.5rem;opacity:0;animation:fadeUp 0.7s 0.5s forwards;}
+.welcome-meta strong{color:var(--ink);font-weight:600;}
+.btn-start{display:inline-flex;align-items:center;gap:10px;padding:16px 40px;background:var(--ink);color:var(--parchment);border:none;border-radius:100px;font-family:var(--font-body);font-size:1rem;font-weight:600;cursor:pointer;letter-spacing:0.02em;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);opacity:0;animation:fadeUp 0.7s 0.6s forwards;}
+.btn-start:hover{background:var(--ember);transform:translateY(-3px);box-shadow:0 12px 36px rgba(194,65,12,0.25);}
+.welcome-modules{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:1.2rem;margin-bottom:2rem;opacity:0;animation:fadeUp 0.7s 0.35s forwards;}
+.module-dot{display:flex;align-items:center;gap:7px;font-size:0.78rem;color:var(--ink-3);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+/* ═══════════════════════════════
+   QUIZ
+═══════════════════════════════ */
+#screen-quiz{background:var(--parchment);}
+.quiz-header{background:var(--ink);padding:1.5rem 2rem 0;position:sticky;top:0;z-index:50;}
+.quiz-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;}
+.quiz-logo{color:var(--parchment);font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.08em;}
+.quiz-logo span{color:var(--ember);}
+.quiz-counter{font-size:0.8rem;color:rgba(250,247,242,0.5);font-weight:500;letter-spacing:0.04em;}
+.quiz-counter strong{color:var(--parchment);font-weight:600;}
+.progress-track{width:100%;height:3px;background:rgba(255,255,255,0.12);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--ember),#F97316);border-radius:2px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1);width:0%;}
+.module-bar{display:flex;gap:3px;padding-top:10px;}
+.module-bar-seg{height:3px;border-radius:2px;flex:1;transition:background 0.4s;}
+.quiz-body{flex:1;max-width:680px;margin:0 auto;width:100%;padding:3rem 2rem 4rem;}
+.question-panel{display:none;animation:slideIn 0.35s cubic-bezier(0.4,0,0.2,1) forwards;}
+.question-panel.active{display:block;}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.q-num-label{font-size:0.78rem;color:var(--ink-3);margin-bottom:0.6rem;font-weight:500;letter-spacing:0.05em;}
+.q-text{font-size:clamp(1.05rem,2.5vw,1.25rem);font-weight:500;line-height:1.55;margin:0.5rem 0 2rem;color:var(--ink);}
+.q-options{display:flex;flex-direction:column;gap:0.65rem;}
+.q-option{display:flex;align-items:center;gap:1rem;padding:0.95rem 1.25rem;border:1.5px solid var(--parchment-3);border-radius:10px;cursor:pointer;background:var(--parchment);transition:all 0.18s ease;user-select:none;}
+.q-option:hover{border-color:var(--ink-2);background:var(--parchment-2);transform:translateX(3px);}
+.q-option.selected{border-color:var(--ember);background:rgba(194,65,12,0.05);}
+.q-option.selected .opt-radio{border-color:var(--ember);background:var(--ember);}
+.q-option.selected .opt-radio::after{content:'';width:7px;height:7px;background:white;border-radius:50%;}
+.opt-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--parchment-3);flex-shrink:0;display:grid;place-items:center;transition:all 0.2s;}
+.opt-text{font-size:0.88rem;line-height:1.45;color:var(--ink);}
+.q-nav{display:flex;align-items:center;justify-content:space-between;margin-top:2.5rem;}
+.btn-prev{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:100px;border:1.5px solid var(--parchment-3);background:none;cursor:pointer;font-family:var(--font-body);font-size:0.85rem;color:var(--ink-3);transition:all 0.2s;}
+.btn-prev:hover{border-color:var(--ink-2);color:var(--ink);}
+.btn-prev:disabled{opacity:0.3;pointer-events:none;}
+.btn-home{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:100px;border:1.5px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.08);cursor:pointer;font-family:var(--font-body);font-size:0.78rem;color:rgba(250,247,242,0.65);transition:all 0.2s;}
+.btn-home:hover{border-color:rgba(255,255,255,0.4);color:var(--parchment);background:rgba(255,255,255,0.14);}
+.btn-next{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:100px;background:var(--ink);color:var(--parchment);border:none;cursor:pointer;font-family:var(--font-body);font-size:0.9rem;font-weight:600;transition:all 0.2s cubic-bezier(0.34,1.56,0.64,1);opacity:0.35;pointer-events:none;}
+.btn-next.ready{opacity:1;pointer-events:auto;}
+.btn-next.ready:hover{background:var(--ember);transform:translateX(3px);}
+.btn-next.is-last{background:var(--ember);}
+.btn-next.is-last.ready:hover{background:var(--ember-light);}
+
+/* ═══════════════════════════════
+   RESULTS
+═══════════════════════════════ */
+/* results screen itself is just a container; layout handled by fixed left panel */
+#screen-results{background:var(--parchment-2);min-height:100vh;}
+
+.btn-action{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:100px;font-family:var(--font-body);font-size:0.82rem;font-weight:600;cursor:pointer;border:none;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+.btn-action.primary{background:var(--ember);color:white;}
+.btn-action.primary:hover{background:var(--ember-light);transform:translateY(-2px);}
+.btn-action.outline{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.25);color:var(--parchment);}
+.btn-action.outline:hover{background:rgba(255,255,255,0.18);transform:translateY(-2px);}
+.btn-action.loading{opacity:0.6;pointer-events:none;}
+
+/* ── LEFT PANEL: fixed to viewport, dark ── */
+.res-left{
+  position:fixed;
+  left:0;top:var(--topbar-h,64px);bottom:0;
+  width:var(--left-w,420px);
+  background:var(--parchment-2);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:90;
+  border-right:1px solid var(--parchment-3);
+}
+
+.results-topbar{
+  position:fixed;top:0;left:0;right:0;
+  z-index:200;
+  background:var(--ink);
+  padding:1.1rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:0.8rem;
+}
+.results-logo{font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.08em;color:var(--parchment);}
+.results-logo span{color:var(--ember);}
+.results-actions-top{display:flex;gap:0.6rem;}
+
+.results-score-header{
+  padding:1.1rem 1.4rem 1.2rem;
+  border-bottom:1px solid var(--parchment-3);
+  flex-shrink:0;
+  background:var(--parchment-2);
+}
+.tscore-label{font-size:0.58rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px;}
+.tscore-num{font-family:var(--font-display);font-size:2rem;line-height:1;color:var(--ink);}
+.tscore-num sub{font-size:0.75rem;color:var(--ink-3);font-family:var(--font-body);vertical-align:bottom;}
+.tscore-band{display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;}
+.tscore-title{font-size:0.9rem;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.tscore-desc{font-size:0.72rem;color:var(--ink-2);line-height:1.5;}
+
+/* radar fills remaining height in left panel */
+.radar-wrap{
+  flex:1;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem 0.6rem 1.2rem;
+  overflow:hidden;
+}
+.radar-wrap canvas{display:block;}
+
+/* ── RIGHT: scrollable, offset by left panel width ── */
+.res-right{
+  margin-left:var(--left-w,420px);
+  padding-top:calc(var(--topbar-h,64px) + 2rem);
+  padding-left:2.5rem;
+  padding-right:2.5rem;
+  padding-bottom:5rem;
+  min-height:100vh;
+  background:var(--parchment-2);
+}
+
+/* Section header */
+.sec-title{
+  font-family:var(--font-display);
+  font-size:1.2rem;
+  margin-bottom:1.1rem;
+  color:var(--ink);
+}
+
+/* Snapshot cards */
+.snapshot-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2.5rem;}
+.snap-card{border-radius:14px;padding:1.2rem 1.3rem;border:1px solid var(--parchment-3);background:var(--parchment);}
+.snap-card.gold{background:var(--gold-grad);border:none;box-shadow:0 4px 20px rgba(146,96,10,0.22);}
+.snap-header{display:flex;align-items:center;gap:8px;margin-bottom:0.8rem;}
+.snap-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;}
+.snap-lbl{font-size:0.66rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);}
+.snap-card.gold .snap-lbl{color:rgba(120,70,0,0.75);font-weight:700;}
+.snap-name{font-family:var(--font-display);font-size:1.1rem;color:var(--ink);}
+.snap-card.gold .snap-name{color:#7C3000;}
+.snap-score{font-size:0.76rem;color:var(--ink-3);margin-top:0.25rem;}
+.snap-card.gold .snap-score{color:rgba(120,60,0,0.65);}
+.snap-ember{color:var(--ember);}
+
+/* Dimension cards */
+.dim-list{display:flex;flex-direction:column;gap:0.9rem;}
+.dim-card{border:1px solid var(--parchment-3);border-radius:14px;overflow:hidden;background:var(--parchment);}
+.dim-head{display:flex;align-items:center;gap:10px;padding:1rem 1.2rem;cursor:pointer;transition:background 0.15s;}
+.dim-head:hover{background:var(--parchment-2);}
+.dim-head-icon{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;}
+.dim-head-txt{flex:1;}
+.dim-head-name{font-size:0.9rem;font-weight:600;}
+.dim-head-sub{font-size:0.71rem;color:var(--ink-3);margin-top:1px;}
+.dim-badge{font-size:0.65rem;font-weight:700;letter-spacing:0.05em;padding:3px 8px;border-radius:100px;flex-shrink:0;}
+.dim-chev{width:15px;height:15px;transition:transform 0.25s;color:var(--ink-3);flex-shrink:0;}
+.dim-card.open .dim-chev{transform:rotate(180deg);}
+.dim-body{display:none;padding:0 1.2rem 1.2rem;border-top:1px solid var(--parchment-2);}
+.dim-card.open .dim-body{display:block;}
+.dim-desc{font-size:0.82rem;color:var(--ink-2);line-height:1.7;padding-top:0.9rem;margin-bottom:0.8rem;border-bottom:1px solid var(--parchment-3);padding-bottom:0.8rem;}
+.dim-sec{margin-top:0.9rem;}
+.dim-sec-title{font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.22rem;}
+.dim-sec p{font-size:0.82rem;color:var(--ink-2);line-height:1.7;}
+.dim-sec ul{list-style:none;display:flex;flex-direction:column;gap:3px;margin-top:0.22rem;}
+.dim-sec li{font-size:0.81rem;color:var(--ink-2);padding-left:1.2rem;position:relative;line-height:1.65;}
+.dim-sec li::before{content:'→';position:absolute;left:0;color:var(--ember);}
+
+/* Footer */
+.quiz-footer-bar{background:var(--ink);text-align:center;padding:1rem;font-size:0.72rem;color:rgba(250,247,242,0.22);letter-spacing:0.06em;}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--parchment);padding:0.75rem 1.5rem;border-radius:100px;font-size:0.85rem;z-index:9999;transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ═══════════════════════════════
+   RESPONSIVE ≤900px: single column, no fixed panel
+═══════════════════════════════ */
+@media(max-width:900px){
+  .results-topbar{position:sticky;width:100%;}
+  .res-left{
+    position:relative;
+    top:auto !important;
+    width:100%;
+    height:auto;
+    border-right:none;
+    border-bottom:1px solid var(--parchment-3);
+  }
+  .radar-wrap{min-height:300px;}
+  .res-right{
+    margin-left:0;
+    min-height:auto;
+    padding-top:1.5rem;
+    padding-left:1.5rem;
+    padding-right:1.5rem;
+    padding-bottom:4rem;
+  }
+  /* always open on mobile */
+  .dim-body{display:block !important;}
+  .dim-chev{display:none !important;}
+  .dim-head{cursor:default !important;}
+  .dim-head:hover{background:transparent !important;}
+}
+@media(max-width:600px){
+  .quiz-body{padding:2rem 1.2rem 3rem;}
+  .res-right{padding:1.2rem 1.2rem 4rem;}
+  .welcome-modules{gap:0.8rem;}
+  .snapshot-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ WELCOME ═══════════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-bg"></div>
+  <nav class="welcome-nav">
+    <div class="logo">AI-<span>PROOF</span></div>
+    <div class="logo-badge">能力测试</div>
+  </nav>
+  <div class="welcome-body">
+    <div class="welcome-card">
+      <div class="welcome-eyebrow">AI-Proof Skills · 六维能力自测</div>
+      <h1>找到你的<br><em>专属能力图谱</em></h1>
+      <div class="welcome-modules" id="welcome-modules"></div>
+      <div class="welcome-notice">
+        <strong>作答建议：</strong>本测验完全匿名，结果仅供本人参考，不会被任何人查看。题目没有「正确答案」，选择你实际上会怎么做的选项，而非你觉得「应该」怎么做的选项——前者给你真实图谱，后者只给你一个假象。
+      </div>
+      <div class="welcome-meta"><strong>30</strong> 道情境题 &nbsp;·&nbsp; 约 <strong>5</strong> 分钟 &nbsp;·&nbsp; 作答后即可查看六维能力雷达图</div>
+      <button class="btn-start" onclick="startQuiz()">立即测试 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ QUIZ ═══════════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-header-top">
+      <div class="quiz-logo">AI-<span>PROOF</span></div>
+      <div style="display:flex;align-items:center;gap:0.8rem">
+        <button class="btn-home" onclick="goHome()" title="返回首页">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          首页
+        </button>
+        <div class="quiz-counter">第 <strong id="q-num">1</strong> / 30 题</div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="module-bar" id="module-bar"></div>
+  </div>
+  <div class="quiz-body" id="quiz-body"></div>
+  <div class="quiz-footer-bar">AI-PROOF · 人类稀缺能力测评</div>
+</div>
+
+<!-- ═══════════════ RESULTS ═══════════════ -->
+<div id="screen-results" class="screen">
+
+  <!-- Full-width fixed topbar -->
+  <div class="results-topbar" id="results-topbar">
+    <div class="results-logo">AI-<span>PROOF</span></div>
+    <div class="results-actions-top">
+      <button class="btn-action outline" onclick="goHome()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        首页
+      </button>
+      <button class="btn-action outline" onclick="restartQuiz()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        重新测试
+      </button>
+      <button class="btn-action primary" id="btn-download" onclick="downloadResult()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        下载结果
+      </button>
+    </div>
+  </div>
+
+  <!-- Two-column body: left fixed, right scrolls -->
+  <div id="results-capture-area">
+
+    <!-- LEFT: scores + radar -->
+    <div class="res-left" id="res-left">
+      <div class="results-score-header" id="results-score-header">
+        <div id="total-score-band"></div>
+      </div>
+      <div class="radar-wrap">
+        <canvas id="radar-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT: scrollable -->
+    <div class="res-right" id="res-right"></div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════
+   ICONS
+═══════════════════════════════ */
+const RAW = {
+  design:      `<svg viewBox="0 0 24 24" fill="none" stroke="SC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`,
+  narrative:   `<svg viewBox="0 0 24 24" fill="none" stroke="SC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+  empathy:     `<svg viewBox="0 0 24 24" fill="none" stroke="SC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  integration: `<svg viewBox="0 0 24 24" fill="none" stroke="SC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+  exploration: `<svg viewBox="0 0 24 24" fill="none" stroke="SC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+  meaning:     `<svg viewBox="0 0 24 24" fill="none" stroke="SC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+};
+function ic(id,color,sz){
+  return (RAW[id]||RAW.meaning)
+    .replace('<svg ',`<svg width="${sz}" height="${sz}" `)
+    .replace(/stroke="SC"/g,`stroke="${color}"`);
+}
+
+/* ═══════════════════════════════
+   DATA
+═══════════════════════════════ */
+const MODULES=[
+  {id:'design',color:'#1D4ED8',title:'设计思维',
+   desc:'AI 时代最容易被忽视的能力之一——不是「会用设计工具」，而是真正以人为中心地提问。设计思维的本质是一种拒绝假设的习惯：在你动手解决问题之前，先花时间确认你解决的是真实存在的问题。它的核心不是创意，而是通过接触真实的人、快速制造可以被检验的原型、在反馈中不断修正方向，让你和现实之间的距离越来越小。这种能力在 AI 时代格外稀缺，因为 AI 可以生成一百个方案，但无法判断哪一个真正值得做。',
+   levels:{
+    low:{label:'初探阶段',
+      strengths:'你的行动力是真实的资产——想到就做，不拖泥带水。很多人在「分析瘫痪」中卡死，你却能推着事情往前走。',
+      weaknesses:'你目前最大的风险在于：你动得太快，还没看清楚要解决什么问题就开始解决了。大多数时候你解决的是「你以为的问题」，而不是「真实存在的问题」。这不是努力不够，而是少了一个「先暂停一下」的习惯。',
+      tips:['每次启动新方案前，写下一个问题：「我做这件事是为了帮谁解决什么困难？」——不允许用「用户」「大众」等模糊词，要有真实具体的人。','下周找一个真实用户或使用者聊 20 分钟，只听，不推销。把他说的话逐字记下来，你会发现很多你没想到的东西。','做一个「最小版本」：你现在正在做的事，如果只能完成 20% 最核心的功能，那 20% 是什么？先做那个，其他的先不管。']},
+    mid:{label:'成长阶段',
+      strengths:'你已经开始在意「别人怎么看」，而不只是「我怎么想」。你知道反馈有价值，也愿意收集它。这是设计思维中最难跨越的一步——很多人终其职业生涯都没有学会这件事。',
+      weaknesses:'你的盲点是：你收集反馈，但有时是为了「确认自己是对的」，而不是「看看哪里需要改」。验证停留在表面——问了，听了，但没有真正让反馈改变你的决策。另外，你可能还在把用户体验理解为一种美化，而不是一种研究。',
+      tips:['下次收到含糊的反馈（比如「感觉不太对」），不要接受它，要追问：「是哪个具体场景让你感觉不太对？」——把模糊变成具体，才能真正行动。','学习用「共情地图」结构化你的洞察：用户在这个场景里「看到什么、听到什么、感受到什么、说了什么、做了什么」——五个维度，比「用户想要什么」深得多。','设计一次真正的测试：选一个你以为已经确定的判断，设计一个小实验来验证它——哪怕结果证明你是对的，测试的过程本身也会让你更扎实。']},
+    high:{label:'熟练阶段',
+      strengths:'你已经把「以用户为中心」内化为一种本能。你在推进事情的同时，知道什么时候该停下来验证，什么时候该快速迭代。在你身边的人眼里，你是那个「总能找到真正问题」的人。',
+      weaknesses:'你现在的风险是走向另一个极端——过度分析和过度验证。有时候你会因为「还没有足够的数据」而推迟本来可以直接决策的事。另外，你的设计思维可能还停留在个人层面，没有扩散到团队或组织。',
+      tips:['为自己设定一个「决策截止时间」：对于小决策，允许自己在信息不完整的情况下前进，相信迭代会修正方向。','把设计思维方法教给你的团队成员——不是讲理论，而是带着他们做一次用户访谈或原型测试。教的过程本身会让你的理解更深一层。','探索「系统级设计」：不只是单一产品或功能，而是思考整个用户旅程和生态系统。你的下一个突破可能在更大的尺度上。']},
+   }},
+  {id:'narrative',color:'#C2410C',title:'叙事创造',
+   desc:'人类有一种独特的需求：我们不只是需要理解一件事，我们需要被一件事打动，才会真的去做。这就是叙事创造存在的意义。叙事不是修辞技巧，不是让话听起来更好听——它是一种思维方式：在开口之前，先想清楚「我希望对方读完这段话之后，产生什么感受、做出什么决定」。在 AI 可以瞬间生成千字文章的时代，没有个人风格、没有真实视角的表达会越来越廉价；而有温度、有判断、让人看完想继续读的文字，反而越来越稀缺。',
+   levels:{
+    low:{label:'初探阶段',
+      strengths:'你敢说出自己的想法，这在很多人反复斟酌、最终说了一堆废话的世界里，是一种直接的力量。你的表达里有真实性，而真实性是叙事最重要的原材料。',
+      weaknesses:'你的表达目前更像是「信息传递」而不是「叙事」：你告诉别人发生了什么，但还没有告诉他们为什么这件事重要，也没有让他们感受到任何东西。读你写的东西，对方会知道你说了什么，但不会记住，不会被说服，也不会因此而行动。',
+      tips:['在你写任何东西之前，先回答这一个问题：「我希望读完这段文字的人，产生什么感受，或者做什么事？」——用一句话写下来，贴在旁边，写完后检查一遍：你的文字有没有朝那个方向走。','尝试「故事开场」：下次汇报或说明一件事，不要从背景信息开始，从一个具体的瞬间或场景开始——「上周三下午，一个用户给我们发了一条消息……」——具体细节比抽象概念更能让人注意。','每周写一篇 200 字左右的短文，只谈一个观点，不允许废话。写完后大声读出来——听起来顺不顺，有没有让你自己也觉得「对，就是这样」。']},
+    mid:{label:'成长阶段',
+      strengths:'你已经懂得逻辑的重要性，能建立清晰的论点结构，不会说着说着偏题。读你写的东西，对方通常能知道你在说什么——这其实比大多数人做得好。',
+      weaknesses:'你的文字有骨架，但缺乏血肉。读起来正确，却不让人心动。这背后可能有两个原因：一是你还不确定自己的「写作声音」是什么，所以写出来像是某种「标准版本」；二是你依赖 AI 或模板起草，结果输出的东西和千万个其他人的没什么区别。',
+      tips:['找三篇你真心觉得写得好、让你读完想继续读的文章，分析它们的共同点：是开头的方式？是句子的节奏？是说话的视角？——然后刻意在你自己的写作里试验其中一个特点。','练习「倒置金字塔」：把你最重要的结论或判断放在最开头，然后才是支撑它的理由和细节——大多数人写作习惯从背景开始，但读者往往在背景还没读完就放弃了。','连续三周，不用 AI 起草任何你的重要表达——邮件、汇报、方案说明都自己写。你会感到别扭，这个别扭本身就是你找到自己声音的过程。']},
+    high:{label:'熟练阶段',
+      strengths:'你的表达有独特的个人印记——读你写的东西，能感受到一个真实的人在背后，有视角，有判断，有温度。你能根据不同受众调整叙事方式，知道什么时候用数据，什么时候用故事，什么时候用直接的结论。你影响过别人的决定，你知道这种感觉。',
+      weaknesses:'在高水平上，你的风险往往是「过度打磨」——你知道如何让一段文字更好，所以你总在改，导致产出速度变慢，或者在不需要精雕细琢的场合也花了太多时间。另一个风险是叙事的舒适圈：你可能已经找到了一套有效的模式，但正因为它有效，你不再突破它。',
+      tips:['为自己设定「完成就发」的练习场景：找一个低风险的输出渠道（私人笔记、小圈子分享），故意在感觉「还没完全好」的时候发出去，观察反应——你会发现 80 分的东西往往和 95 分的东西效果差不多，而那 15 分你花了 80% 的时间。','尝试一种你从未用过的叙事媒介：如果你习惯写文章，试试做一次演讲或视频；如果你习惯演讲，试试用视觉图表来讲一个完整的故事——新媒介会暴露你叙事逻辑里的假设。','开始为他人提供叙事反馈：当你帮别人改文章、改演讲稿时，你会发现你对叙事的理解有了新的维度——教和被教是完全不同的认知体验。']},
+   }},
+  {id:'empathy',color:'#15803D',title:'共情理解',
+   desc:'共情不是「我能理解你的感受」这句话，而是在说这句话之前你真正做到的那件事。它是一种主动的认知动作：你在对话里暂停自己的框架，真正进入另一个人的世界，理解他为什么这样感受，为什么这样反应，在他的处境里什么是重要的。这在 AI 时代是一种结构性优势——机器可以模拟共情的语言，但无法真正读懂另一个人此刻的状态。而组织里几乎所有真正困难的事——团队信任、跨部门协作、客户关系——都依赖这种人类独有的感知能力。',
+   levels:{
+    low:{label:'初探阶段',
+      strengths:'你有真心想帮助别人的意愿。这不是小事——很多人在职场里已经完全切换到「交换模式」，而你还保留着对别人处境的基本好奇心，这是共情能力成长的土壤。',
+      weaknesses:'你目前最常见的模式是：用你自己的经历解读别人的处境。当同事说「我最近很累」，你可能会想到自己累的时候是怎么度过的，然后给出一个基于你自己经验的建议——这很自然，但它是在以你为中心，而不是以对方为中心。还有一种模式是：在对方还没说完的时候，你已经在想怎么回应了。',
+      tips:['做一个实验：今天和一个人说话的时候，给自己定一个规则——对方说完之前，你不允许在心里组织回应。只听，然后问一个问题。看看你能在他们的话里发现什么你平时会错过的东西。','练习「复述确认」：在对方说完一段话后，用你自己的话复述你理解的意思，然后问「我理解得对吗？」——这个动作会让对方感到被真正听见，也会帮你发现你的理解和对方意思之间的偏差。','观察一次你参与的会议：谁在真正听？谁在等机会发言？然后观察这两种状态的人，会议结束后他们各自得到了什么——你会发现「真正在听」的人，往往提出了最有价值的问题。']},
+    mid:{label:'成长阶段',
+      strengths:'在大多数日常情境里，你能感知对方的情绪状态，知道什么时候该推进、什么时候该放慢，能在交流中建立信任感。你可能是朋友圈里那个「说话让人舒服」的人。',
+      weaknesses:'在压力下、在立场对立时，你的共情能力会大幅下滑。当你需要捍卫自己的观点，或者面对你不太喜欢的人，「听懂对方在说什么」和「理解为什么对方会这样想」会变得非常困难——你会开始在心里找对方的错误，而不是找对方的逻辑。这是人类的本能，也是共情能力真正被考验的地方。',
+      tips:['刻意练习「不舒服的对话」：下次和立场不同的人交流，给自己设一个小任务：在你表达任何反对意见之前，先说出你理解对方这样想的「至少一个合理理由」——不是为了同意，而是为了真正理解。','读《非暴力沟通》（马歇尔·卢森堡），做一件书里要求的练习：把你最近的一次冲突用「观察、感受、需求、请求」四个维度重新描述一遍——你会发现很多你以为是对方的问题，其实是沟通方式的问题。','在下一次团队决策中，主动扮演「最弱势一方的代言人」：不管你个人的立场是什么，用五分钟时间说出方案对受影响最小、最边缘的那部分人意味着什么——这个角色切换会让你的共情思维更有弹性。']},
+    high:{label:'熟练阶段',
+      strengths:'你有罕见的多层次感知能力——不只是感知一个人的情绪，而是能在复杂的多方关系中同时理解不同人的处境、动机和未被说出口的需求。你往往是冲突中能看到全局的那个人，是别人在困难时刻第一个想联系的对象。',
+      weaknesses:'你的风险是「共情疲劳」和边界模糊。你对别人的处境太敏感，有时会不自觉地把别人的情绪当成自己的负担来承担。另一个风险是：你太擅长理解别人，反而有时候会压抑自己真实的想法和需求，以维持关系的和谐——长期下来，这会让你感到被消耗。',
+      tips:['为自己建立「共情的边界」：学会区分「我理解你的处境」和「我为你的处境负责」——前者让你成为更好的支持者，后者会让你精疲力竭。当你感到过度卷入时，这个区分会帮你重新找到位置。','发展「结构化共情」：感受对方 → 分析背后的需求 → 思考可以采取的行动——把共情从一种纯粹的情感体验，转化成也能引导行动的工具。','探索「组织级共情」：如何把你个人的感知能力，变成你所在团队或组织的一种能力？从设计产品的方式、到做决策的方式、到给反馈的方式，共情可以系统性地嵌入组织文化。']},
+   }},
+  {id:'integration',color:'#7C3AED',title:'跨领域整合',
+   desc:'最有价值的洞见，几乎从不产生于一个领域内部。它出现在两个原本不相关的领域之间——当一个生态学的概念被带进商业战略时，当一个音乐结构的逻辑被用来思考产品设计时，当一个古代哲学的框架被用来解决现代组织问题时。跨领域整合是一种刻意培养的思维习惯：你主动保持多元的知识输入，你的大脑里有来自不同领域的「心智模型」，当面对新问题时，你会本能地问「有哪个完全不同的领域已经解决了这个问题？」这种能力，是 AI 最难真正模仿的人类认知优势之一。',
+   levels:{
+    low:{label:'初探阶段',
+      strengths:'在你的专业领域，你有真实的积累——这是跨领域整合的出发点。没有「一个领域的深度」，所谓跨界只是浮光掠影。你有一片土地，下一步是开始探索边界以外的世界。',
+      weaknesses:'你目前的思维倾向是在熟悉的领域内循环：遇到问题，你会在已知的框架里找答案。这非常合理，也非常高效——直到某一天你发现这些框架开始解决不了你遇到的问题。跨界联想目前对你来说还是偶发的「灵光一闪」，而不是可以主动触发的能力。',
+      tips:['这个月，选一本和你的专业毫无关联的书来读——不是「相邻领域」，是真正陌生的领域：如果你是工程师，读一本人类学；如果你做市场，读一本神经科学。读的时候，只问一个问题：这里有没有什么概念可以让我用不同的眼光看自己的工作？','下次遇到工作中卡住的问题，花五分钟问自己：「在一个完全不同的行业或学科里，有没有类似的问题被解决过？他们是怎么解决的？」——哪怕答案很粗糙，这个思维动作本身就在打开新的神经连接。','主动认识三个不同行业的人，和他们聊聊「他们的工作里最有意思的问题是什么」——你会惊讶地发现，你们其实面对着相似的困境，只是用不同的语言描述它。']},
+    mid:{label:'成长阶段',
+      strengths:'你有跨界的意识，知道从不同地方寻找灵感。你有时会做出让同事觉得「这个角度很新颖」的联结。你的阅读和思考的多元程度，已经高于大多数同龄人。',
+      weaknesses:'你的跨界联结还更多是「感觉驱动」而不是「方法驱动」：当灵感来了，你能做出漂亮的类比；但当你主动需要一个新视角的时候，你还不确定从哪里找。另外，你的联结可能还停留在表面层次——找到了一个有趣的类比，但没有深入到「这个类比在操作层面告诉了我什么」。',
+      tips:['建立你的「心智模型库」：把你从不同领域学到的框架和概念整理成一份清单（可以是笔记、可以是卡片）。每次遇到新问题时，翻一遍这个清单，问自己：哪一个模型和这个问题最像？','学习「结构化迁移」的方法：当你发现一个跨领域类比时，逼自己走完整个迁移链条——「X 领域的 A 概念，其核心逻辑是 B，如果把这个逻辑用在我的问题 C 上，具体意味着 D」——写下来，而不只是停在「哦这很有趣」。','读查理·芒格的演讲集（《穷查理宝典》），专门学习他如何构建和使用多学科思维模型——这是目前为止最系统的跨领域整合思维的实践手册之一。']},
+    high:{label:'熟练阶段',
+      strengths:'跨领域联想已经成为你的自然思维状态，不是刻意为之。你是团队里那个「总能带来意想不到视角」的人，你的价值在很大程度上来自你独特的知识组合，而不只是你在单一领域的深度。',
+      weaknesses:'你现在的风险是「联结过于超前」——你的思维跳跃速度有时超过了团队能接受的速度。你的类比可能太聪明，导致对方听完之后觉得「有道理，但我不知道怎么用」。另一个风险是广度压过深度：你的触角伸得很远，但某些关键领域的根扎得还不够深。',
+      tips:['练习「翻译技能」：当你做出一个跨领域联结后，把它翻译成对方最熟悉的语言——不是让对方理解你的类比，而是让对方直接感受到新视角对他们问题的价值。类比是脚手架，最终要拆掉它。','有意识地选择 1-2 个「知识交叉口」作为你的专属领地：哪两个领域的组合，是你特别擅长、而且市场上很少有人同时具备的？把这个组合做深，成为那个交叉口上无可替代的人。','把你的思维过程外显出来：下次当你做出一个跨领域联结，尝试把你的思考路径画出来——你是怎么从 A 想到 B 的？写下来分享给团队，这比结论本身更有传播价值。']},
+   }},
+  {id:'exploration',color:'#0E7490',title:'探索自学',
+   desc:'在知识半衰期越来越短的时代，「会学习」的能力比「已经学过什么」更重要。探索自学不是「勤奋读书」，而是一套主动的认知策略：你知道如何提出好问题，知道如何区分真正理解和表面理解，知道如何把新知识和已有框架连接，知道如何在信息过载的世界里找到真正值得深挖的线索。最重要的是，你有「学了就用，用了再学」的闭环意识——学习不是一种美德，而是一种持续更新自己操作系统的实践。',
+   levels:{
+    low:{label:'初探阶段',
+      strengths:'你对新事物有真实的好奇心，愿意尝试和了解。好奇心是一切学习的起点，而真实的好奇心——不是表演出来的求知欲——比任何学习方法都重要。',
+      weaknesses:'你的学习目前以「吸收」为主，以「提问」和「消化」为辅。你会读文章、看视频、参加课程，但如果有人问你「你从中学到了什么，改变了你什么」，你可能会发现很难说清楚。信息进来了，但没有真正成为你认知框架的一部分。另外，你可能对 AI 给出的答案接受度过高——它说什么，你就信什么，缺少追问和验证的习惯。',
+      tips:['下次开始学一个新主题之前，先写下三个你真正想搞清楚的问题——具体的问题，不是「了解 X 是什么」，而是「X 在什么情况下会失效？」「为什么大家都说 X 好但实际效果参差不齐？」——带着问题学，会让你学得更快、记得更深。','试试「费曼技巧」：学完一个概念之后，合上所有资料，用自己的话把它解释出来，假装你在向一个完全不了解这个领域的朋友讲解——讲不清楚的地方，就是你还没真正理解的地方。','对 AI 给出的重要信息，养成「追问一层」的习惯：「你说 X，能告诉我这个结论的依据是什么吗？」「有没有反例？」——不是不信任 AI，而是让自己在这个过程中真正思考，而不是被动接收。']},
+    mid:{label:'成长阶段',
+      strengths:'你有主动学习的习惯，能识别自己的知识盲区，知道自己「不知道什么」——这本身就是一种元认知能力，大多数人终其一生都处于「不知道自己不知道」的状态。你的求知有一定的主动性，而不只是被动地接收推送给你的内容。',
+      weaknesses:'你的学习可能存在「理解的幻觉」——读完一篇文章，感觉「懂了」，但没有真正检验过。另外，你可能还没有建立一套让新知识「沉淀下来」的系统：读了很多，但知识之间的连接不够，容易遗忘，也不容易在需要的时候被调用。',
+      tips:['建立「输出驱动」的学习循环：先承诺一个输出（写一篇文章、做一次分享、向同事解释一个概念），然后为了完成这个输出而去学习——目标倒逼，比漫无目的的阅读效率高得多。','当你学一个新概念，尝试找到它和你已经熟悉的某个概念之间的「相似点」和「不同点」——这个比较动作会让新知识真正挂靠在你的认知框架上，而不是飘在空中。','开始建立属于你自己的「知识地图」：不需要什么工具，一张纸也行——把你正在学的主题，和你已经知道的东西连线，看看哪里密集、哪里空白。空白处往往是最有价值的学习机会。']},
+    high:{label:'熟练阶段',
+      strengths:'你有罕见的元学习能力——不只是学得快，而是知道「如何学」。你能在进入一个新领域后，快速找到这个领域的核心框架和最值得深挖的问题。你的知识体系有内部连接，不是孤立的信息孤岛，而是一个可以持续生长的网络。',
+      weaknesses:'在高水平的自学者中，最常见的风险是「广而不深」：你对很多东西都有快速上手的能力，以至于你很少在一个地方停留足够长的时间，去体验真正的深度——那种需要几年时间才能进入的境界。另一个风险是学习变成了一种「自我优化」的仪式，而不是为了解决真实问题。',
+      tips:['为自己选一个「深水区」：在你最感兴趣的领域里，找一个真正困难的问题，给自己六个月时间，只做这一件事——不追新概念、不广泛涉猎，就是深挖。你会发现深度带来的认知体验，和广度完全不同。','建立你的个人知识管理系统（无论是 Notion、Obsidian 还是纸质笔记本），核心原则只有一个：每一条笔记，都要有「这对我意味着什么」的一句话——没有这句话，就不算真正的笔记。','把「学习」和「教学」绑在一起：定期向别人解释你正在学的东西，可以是文章、可以是对话、可以是视频——教的过程会持续暴露你理解中的漏洞，是最高效的深化方式之一。']},
+   }},
+  {id:'meaning',color:'#BE185D',title:'意义建构',
+   desc:'当 AI 可以给出所有选项、分析所有利弊之后，还剩下一个问题只有你能回答：这对我来说意味着什么？意义建构不是找到人生大问题的终极答案，而是在日常的选择和行动中，持续地和「为什么这件事值得做」保持连接。这是一种价值判断能力，也是一种承担责任的意愿——知道自己站在哪里，知道什么是不可妥协的，知道当外部的标准和内心的声音发生冲突时，如何做出真正属于自己的决定。在一个越来越容易被数据和算法推着走的世界里，这是最后一种真正属于人类的自由。',
+   levels:{
+    low:{label:'初探阶段',
+      strengths:'你在重大问题上有基本的价值直觉——这种直觉不是天赋，而是你所有经历的沉淀。它不一定清晰，但它是真实的，是属于你的。这比那些「什么都无所谓」的人拥有更多出发点。',
+      weaknesses:'你的价值观目前更多是隐性的、未经检验的——在日常小事上，你靠外部标准决策（别人怎么做、什么是成功、什么是对的）；在重大决策面前，你的内心声音还不够清晰，容易被他人的期待或社会标准所淹没。你可能有时候会做了一个「正确」的选择，但事后感到一种说不清楚的空洞感。',
+      tips:['做一次价值观澄清练习：写下 20 个对你来说重要的词——自由、安全、创造、连接、正直……随便写，然后逐步删掉，直到剩下 5 个你真的不愿意放弃的词。把这 5 个词贴在你每天能看到的地方。','回顾你最近三个月里让你感到「对，这就是我应该做的事」的三个瞬间，和三个让你感到「我为什么在做这个」的瞬间——分析两组瞬间的差异，你会找到一些关于你真实价值观的线索。','读一本关于价值观或伦理的书，不是为了找到答案，而是为了找到让你有强烈反应的观点——你强烈同意的，和你强烈不同意的——这些反应比书的内容本身更能告诉你你是谁。']},
+    mid:{label:'成长阶段',
+      strengths:'你有价值观意识，在大多数决策中都能和内心保持某种对话。你知道有些事是你不愿意做的，哪怕有利可图；你知道有些方向是你真正在乎的，哪怕别人不理解。你在意自己的选择是否「对得起自己」，这本身就是一种难得的自我责任感。',
+      weaknesses:'在压力下，你有时会做出事后让自己不舒服的妥协——为了避免冲突，为了让别人满意，为了「先过了这一关」。事后你知道自己妥协了，但当时很难做出不同的选择。另外，你可能还没有把价值观梳理成一套清晰的决策框架——遇到新情境，你还是要重新「感觉」一遍，而不是能够快速判断。',
+      tips:['建立「决策日志」：每次做了一个你不太确定的决定后，记录下来：当时的情境是什么、我最后选择了什么、背后的理由是什么。三个月后回看，你会看到一些你自己都没意识到的模式——什么时候你的决策是价值驱动的，什么时候是恐惧驱动的。','在面临两难选择时，问自己一个具体的问题：「如果五年后回看今天的选择，我会希望我做了什么？」——不是「什么选择结果更好」，而是「什么选择是更真实的我」。','找一个你信任的人，约一次专门的对话：不是聊近况，而是聊「你最近在做的事，和你真正在乎的东西，有多大的重合？」——这种对话很少发生，但往往能在一两个小时里推动你数月都没有想清楚的事。']},
+    high:{label:'熟练阶段',
+      strengths:'你的价值观清晰、稳定，在外部压力下不容易动摇。你知道自己站在哪里，知道什么是红线，也知道什么是可以灵活的。你做决策时有一种内在的踏实感——不是因为你确定结果会好，而是因为你确定你的选择是真实的。人们信任你，是因为他们感受到你的一致性。',
+      weaknesses:'你的风险在于价值观的「过度刚性」——在需要灰色地带判断的情境里，你有时会因为原则性太强而错失好的现实解。另一个更深层的风险是：你的意义感高度依赖于你自己的内在标准，一旦这套标准受到根本性的挑战（遭遇重大失败、人生转折期），你可能会比想象中更脆弱。',
+      tips:['学习「悖论思维」：不是在两个价值之间选一个，而是看能否找到一种方式同时容纳两者的张力——效率与人情、忠诚与诚实、坚持与灵活。这不是折中，而是一种更高阶的整合。','开始思考「遗产维度」：不只是你的工作对今天有什么价值，而是你正在做的事，十年后会留下什么？对谁？这个问题会帮助你把意义感从个人扩展到更大的尺度。','成为他人意义建构的对话者：当身边的人在人生岔路口困惑时，你可以成为一个不给答案、只帮他们把自己的想法说清楚的人——苏格拉底式的对话者。这个角色会持续加深你自己的意义感。']},
+   }},
+];
+
+const TOTAL_LEVELS=[
+  {min:0,  max:60, label:'起步探索者',desc:'你正处于 AI 时代能力图谱的起点。大多数人都低估了这些能力的重要性，而你已经迈出了觉察的第一步。建议从得分最低的 1-2 个维度入手，专注练习三个月，会有明显变化。'},
+  {min:61, max:90, label:'潜力成长者',desc:'你在多个维度已有基础，但整体还在成长阶段。优势是你具备足够的自我意识；接下来需要的是将碎片化的能力练习系统化，建立更稳定的实践习惯。'},
+  {min:91, max:110,label:'均衡实践者',desc:'你在六个维度上达到了相对均衡的水平，没有明显的短板，也没有突出的绝对优势。下一阶段适合在 1-2 个核心维度上做深度突破，建立真正的竞争力壁垒。'},
+  {min:111,max:130,label:'复合能力者',desc:'你具备较高的跨维度能力，在大多数情境下能灵活运用多种人类稀缺技能。AI 时代的优势已经初步显现。下一步是思考：如何将这些能力组合成独特的个人价值主张？'},
+  {min:131,max:150,label:'卓越思考者',desc:'你在 AI 时代人类稀缺能力上展现出高度成熟的状态。建议开始思考如何把这些能力系统化地教授给他人，或应用在更大的问题和影响范围上。'},
+];
+
+const QUESTIONS=[
+  {id:1,module:'design',reverse:false,text:'老板让你在明天早会前拿出一个新产品方向的方案。你最可能的第一步是什么？',options:['立刻打开 PPT 开始做','先花 20 分钟画一张很粗糙的草图理清思路','找几个用户聊聊再说','等信息更全再动手','直接把想法讲出来，不用写']},
+  {id:2,module:'design',reverse:false,text:'你做了一个方案，同事说"感觉哪里不对，但说不清"。你通常会怎么做？',options:['追问他具体哪里不对，一起找到问题','心里有点不爽，但还是会想想','觉得他说不清就算了，按原计划走','找其他人再验证一遍','自己先反思一下方案的假设']},
+  {id:3,module:'design',reverse:true,text:'说实话，当你对某个方案很有把握时，你会倾向于……',options:['跳过用户测试，直接推进','做个简单验证意思一下','认真设计一个测试，哪怕觉得自己是对的','只测试我不确定的部分','让别人去测，我来把控大方向']},
+  {id:4,module:'design',reverse:false,text:'你上次真正访谈过用户（或实际使用者）是什么时候？',options:['这周内','一个月内','半年内','超过半年，或者没有过','我的工作不涉及用户']},
+  {id:5,module:'design',reverse:false,text:'你在解释一个复杂想法时，最常用的方式是？',options:['在纸/白板上随手画图','发一段长文字说明','口头讲，用比喻和例子','列出有逻辑的几个要点','把问题丢给 AI 帮我整理']},
+  {id:6,module:'narrative',reverse:false,text:'你写的东西（报告/文章/消息）发出去之后，通常会发生什么？',options:['经常有人说"写得很清楚"或专门来问','偶尔有人回应，大多数时候没什么反应','对方回复"收到"就没了','我发现大家没仔细看','我不太确定，很少留意']},
+  {id:7,module:'narrative',reverse:true,text:'如果让你写一篇工作汇报，你最自然的做法是？',options:['直接让 AI 起草，改改就发','先列出自己的核心判断，再用 AI 扩写','全部自己写，不用 AI','用 AI 整理资料，观点和结论自己写','按公司模板填就好']},
+  {id:8,module:'narrative',reverse:false,text:'你最近一次需要说服别人接受一个想法，你是怎么开场的？',options:['先讲"为什么这件事重要"，再讲方案','直接讲方案和数据','先讲结论，再补充理由','给对方看一个案例','让 AI 帮我写了一段说辞']},
+  {id:9,module:'narrative',reverse:false,text:'读别人写的东西，你最先注意到的通常是？',options:['这篇文章有没有清晰的主张','逻辑是否前后自洽','语言是否顺畅','有没有数据和来源','格式是否整齐']},
+  {id:10,module:'narrative',reverse:false,text:'有人说你的文章"感觉和 AI 写的一样，没有你的风格"。你的第一反应是？',options:['这很刺痛我，我会认真想想','有点难受，但不知道怎么改','觉得对方太苛刻了','想知道具体哪里这种感觉','这对我来说不重要，清楚就行']},
+  {id:11,module:'empathy',reverse:false,text:'朋友深夜发消息说："最近好累，感觉什么都没意义。" 你最可能回什么？',options:['"怎么了？最近发生什么了？"','给他分析一下可能的原因','"我也有这种阶段，会过去的"','推荐他去运动或冥想','"别想太多，好好休息"']},
+  {id:12,module:'empathy',reverse:true,text:'一个你不太喜欢的同事提出了一个你觉得有问题的方案。你最真实的反应是？',options:['先听完，想想他为什么这么提','内心已经开始想反驳点了','让他说完，再礼貌地提出我的看法','搞清楚他的出发点是什么','快速找到最大的漏洞指出来']},
+  {id:13,module:'empathy',reverse:false,text:'你上一次意识到"我误解了对方的意思"，是在什么情况下？',options:['经常发生，我比较容易想当然','偶尔，通常事后才意识到','很少，我一般会确认清楚再行动','几乎不会，我对理解他人很有把握','想不起来具体情境了']},
+  {id:14,module:'empathy',reverse:false,text:'多方利益冲突的会议上，你通常是什么角色？',options:['试图找到各方都能接受的方案','坚定表达自己一方的立场','安静听，等看清局面再说','协调发言时间和秩序','快速推进到决策，少扯淡']},
+  {id:15,module:'empathy',reverse:false,text:'一次重要沟通结束后，你通常会问自己什么？',options:['"对方有没有感到被理解？"','"我表达清楚了吗？"','"我们达成共识了吗？"','"结果符合预期吗？"','一般不太复盘沟通']},
+  {id:16,module:'integration',reverse:false,text:'你最近一次从"跟工作完全无关的地方"得到灵感，是什么情境？',options:['经常，上周就有一次','偶尔，想起来几个例子','很少，大多数灵感来自行业内','几乎没有过','我不太注意灵感从哪来']},
+  {id:17,module:'integration',reverse:true,text:'同事推荐你读一本完全不在你专业领域的书。你最可能的反应是？',options:['"这跟我的工作有什么关系？" 可能不会看','好奇看看，但不确定能用上','认真读，主动想和自己工作的联系','加到书单，找时间再说','要看是什么书，有些不相关的我会拒绝']},
+  {id:18,module:'integration',reverse:false,text:'你在工作中遇到一个卡了很久的问题。你会怎么寻找突破口？',options:['在完全不同的领域找类似的解决逻辑','在行业内找对标案例','找更有经验的人问','把问题拆得更细再分析','让 AI 给出解决方案选项']},
+  {id:19,module:'integration',reverse:false,text:'你能说清楚你正在做的事和整个系统（行业/组织/社会）的关系吗？',options:['可以，而且我经常这样想','大概能，但细节不够清晰','偶尔想，但不是习惯','很少从这个角度思考','这种大视角对我帮助不大']},
+  {id:20,module:'integration',reverse:false,text:'你的朋友圈/阅读圈的知识背景，和你的专业方向相比是？',options:['非常多元，我主动保持跨界','有一定多样性，但还是以本领域为主','比较集中在相近领域','基本都是同一圈子','我没太留意这件事']},
+  {id:21,module:'exploration',reverse:false,text:'你在开始一项新研究或新项目前，会先做什么？',options:['写下我真正想搞清楚的核心问题','直接搜索开始收集资料','让 AI 给我一个概览','问问有经验的人','看看有没有现成的模板或框架']},
+  {id:22,module:'exploration',reverse:true,text:'AI 给了你一个听起来很合理的答案，你通常会？',options:['直接用，没什么理由怀疑','快速检索一下核心论点','仔细追问来源和依据','如果和我的直觉一致就接受','看情况，重要事情才会核查']},
+  {id:23,module:'exploration',reverse:false,text:'你刚学了一个新概念（如"反脆弱"或"双钻模型"）。你通常怎么知道自己真的懂了？',options:['当我能用自己的话举例解释清楚时','当我能把它应用到实际问题时','当我把它教给别人时','当我觉得"懂了"的时候','说实话，大多数时候不太确认这件事']},
+  {id:24,module:'exploration',reverse:false,text:'当你发现一篇文章的核心论点和你原来的判断相反，你会？',options:['认真读，想想它哪里有道理','快速找它的漏洞来反驳','收藏下来，但不确定会不会读','大概率会跳过','根据作者的资历决定要不要认真看']},
+  {id:25,module:'exploration',reverse:false,text:'没有截止日期、没有人要求你，你上一次主动学一件新东西是什么时候？',options:['这周或这个月内','最近三个月内','半年内','超过半年','想不起来了，或者极少发生']},
+  {id:26,module:'meaning',reverse:false,text:'有人给你一个薪资高出很多但你不感兴趣的工作机会，你最可能？',options:['认真考虑，但会把"我是否在意这件事"放在很重要的位置','主要看钱和发展，兴趣是次要的','问自己三年后会不会后悔','问问身边人的看法再决定','做一个利弊列表，选分高的']},
+  {id:27,module:'meaning',reverse:true,text:'你做了一个决定，事后证明结果不好。你最自然的反应是？',options:['找找当时决策过程里有没有可以改的地方','先懊悔一阵，然后就过去了','分析哪些是我可控的，哪些是运气','接受教训，但不会过于纠结','把原因归结到外部环境']},
+  {id:28,module:'meaning',reverse:false,text:'面对一个"对你有利但对别人不公平"的选择，你最真实的状态是？',options:['会很纠结，真的在意这件事','会在意，但最后往往还是选对自己有利的','做一个权衡，如果差距不大会选公平的','觉得这是商业/职场正常规则，不会纠结','看"不公平"到什么程度']},
+  {id:29,module:'meaning',reverse:false,text:'你现在做的事，如果完全没有薪水、没有人认可，你还会做吗？',options:['会，我真的认为它值得做','大概率不会，但我挺认同它的价值','不会，但这不是坏事，工作就是工作','不确定，从没想过这个问题','会的，但方式会完全不同']},
+  {id:30,module:'meaning',reverse:false,text:'当你对一件事有强烈直觉但没有充分理由，你通常会？',options:['认真对待这个直觉，找它背后的逻辑','忽略它，等有足够证据再说','在决策中给直觉一定权重，但不全信','把它说给别人听，看他们的反应','根据决策大不大来决定要不要理它']},
+];
+
+/* ═══════════════════════════════
+   STATE
+═══════════════════════════════ */
+let answers={}, currentQ=0;
+
+/* init welcome icons */
+document.getElementById('welcome-modules').innerHTML=MODULES.map(m=>
+  `<div class="module-dot"><span style="display:inline-flex;align-items:center">${ic(m.id,m.color,14)}</span>&nbsp;${m.title}</div>`
+).join('');
+
+/* ═══════════════════════════════
+   SCREEN
+═══════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function startQuiz(){showScreen('quiz');renderModuleBar();renderQuestion();}
+
+/* ═══════════════════════════════
+   QUIZ
+═══════════════════════════════ */
+function renderModuleBar(){
+  document.getElementById('module-bar').innerHTML=MODULES.map(m=>
+    `<div class="module-bar-seg" id="seg-${m.id}" style="background:rgba(255,255,255,0.12)"></div>`
+  ).join('');
+}
+function updateModuleBar(){
+  const cnt={};MODULES.forEach(m=>cnt[m.id]=0);
+  QUESTIONS.slice(0,currentQ).forEach(q=>cnt[q.module]++);
+  MODULES.forEach(m=>{
+    const seg=document.getElementById('seg-'+m.id);if(!seg)return;
+    seg.style.background=cnt[m.id]>=5?m.color:cnt[m.id]>0?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.12)';
+  });
+}
+function renderQuestion(){
+  if(currentQ>=QUESTIONS.length){showResults();return;}
+  const q=QUESTIONS[currentQ],isLast=currentQ===QUESTIONS.length-1,savedRaw=answers[q.id+'_raw'];
+  document.getElementById('q-num').textContent=currentQ+1;
+  document.getElementById('progress-fill').style.width=(currentQ/QUESTIONS.length*100)+'%';
+  updateModuleBar();
+  document.getElementById('quiz-body').innerHTML=`
+    <div class="question-panel active">
+      <div class="q-num-label">第 ${currentQ+1} 题，共 30 题</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-options">
+        ${q.options.map((opt,i)=>{const raw=5-i;return`<div class="q-option${savedRaw===raw?' selected':''}" onclick="selectOpt(this,${q.id},${raw},${q.reverse})"><div class="opt-radio"></div><div class="opt-text">${opt}</div></div>`;}).join('')}
+      </div>
+      <div class="q-nav">
+        <button class="btn-prev" onclick="prevQ()"${currentQ===0?' disabled':''}>← 上一题</button>
+        <button class="btn-next${answers[q.id]?' ready':''} ${isLast?'is-last':''}" id="btn-next" onclick="nextQ()">${isLast?'查看结果 →':'下一题 →'}</button>
+      </div>
+    </div>`;
+}
+function selectOpt(el,qId,raw,rev){
+  document.querySelectorAll('.q-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[qId+'_raw']=raw;answers[qId]=rev?(6-raw):raw;
+  const btn=document.getElementById('btn-next');if(btn)btn.classList.add('ready');
+}
+function nextQ(){if(!answers[QUESTIONS[currentQ].id]){showToast('请先选择一个答案');return;}currentQ++;renderQuestion();window.scrollTo(0,0);}
+function prevQ(){if(currentQ>0){currentQ--;renderQuestion();window.scrollTo(0,0);}}
+
+/* ═══════════════════════════════
+   RESULTS
+═══════════════════════════════ */
+function lv(s){return s<=10?'low':s<=18?'mid':'high';}
+
+function showResults(){
+  const scores={};MODULES.forEach(m=>scores[m.id]=0);
+  QUESTIONS.forEach(q=>{if(answers[q.id])scores[q.module]+=answers[q.id];});
+  const total=Object.values(scores).reduce((a,b)=>a+b,0);
+  const tl=TOTAL_LEVELS.find(l=>total>=l.min&&total<=l.max)||TOTAL_LEVELS[TOTAL_LEVELS.length-1];
+  const ranked=MODULES.map(m=>({...m,score:scores[m.id]||0})).sort((a,b)=>b.score-a.score);
+  const best=ranked[0],worst=ranked[ranked.length-1];
+
+  /* Total score band */
+  document.getElementById('total-score-band').innerHTML=`
+    <div class="tscore-band">
+      <div><div class="tscore-label">总分</div><div class="tscore-num">${total}<sub> / 150</sub></div></div>
+      <div style="flex:1;min-width:0"><div class="tscore-label">综合评级</div><div class="tscore-title">${tl.label}</div><div class="tscore-desc">${tl.desc}</div></div>
+    </div>`;
+
+  /* Right panel */
+  document.getElementById('res-right').innerHTML=`
+    <!-- 总览 -->
+    <div class="sec-title">总览</div>
+    <div class="snapshot-grid">
+      <div class="snap-card gold">
+        <div class="snap-header">
+          <div class="snap-icon" style="background:rgba(180,100,0,0.15)">${ic(best.id,'#92600A',15)}</div>
+          <div class="snap-lbl">最强维度</div>
+        </div>
+        <div class="snap-name">${best.title}</div>
+        <div class="snap-score">${best.score} / 25 分 · ${best.levels[lv(best.score)].label}</div>
+      </div>
+      <div class="snap-card">
+        <div class="snap-header">
+          <div class="snap-icon" style="background:${worst.color}16">${ic(worst.id,worst.color,15)}</div>
+          <div class="snap-lbl snap-ember">优先提升</div>
+        </div>
+        <div class="snap-name">${worst.title}</div>
+        <div class="snap-score snap-ember">${worst.score} / 25 分 · 重点加强</div>
+      </div>
+    </div>
+
+    <!-- 维度详细说明 -->
+    <div class="sec-title">维度详细说明</div>
+    <div class="dim-list">
+      ${MODULES.map(m=>{
+        const s=scores[m.id]||0,lvl=lv(s),info=m.levels[lvl];
+        const bg=lvl==='high'?'#DCFCE7':lvl==='mid'?'#FEF3C7':'#FEE2E2';
+        const fg=lvl==='high'?'#15803D':lvl==='mid'?'#B45309':'#B91C1C';
+        return`<div class="dim-card open" id="dim-${m.id}">
+          <div class="dim-head" onclick="toggleDim('${m.id}')">
+            <div class="dim-head-icon" style="background:${m.color}14">${ic(m.id,m.color,15)}</div>
+            <div class="dim-head-txt">
+              <div class="dim-head-name">${m.title}</div>
+              <div class="dim-head-sub">${s} / 25 分</div>
+            </div>
+            <span class="dim-badge" style="background:${bg};color:${fg}">${info.label}</span>
+            <svg class="dim-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="dim-body">
+            <p class="dim-desc">${m.desc}</p>
+            <div class="dim-sec"><div class="dim-sec-title" style="color:#15803D">优势</div><p>${info.strengths}</p></div>
+            <div class="dim-sec"><div class="dim-sec-title" style="color:var(--ember)">盲区</div><p>${info.weaknesses}</p></div>
+            <div class="dim-sec"><div class="dim-sec-title" style="color:#7C3AED">提升方向</div><ul>${info.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+
+  showScreen('results');
+
+  requestAnimationFrame(()=>{
+    /* set CSS var for topbar height so left panel top is correct */
+    const tbH=document.getElementById('results-topbar').offsetHeight;
+    document.documentElement.style.setProperty('--topbar-h', tbH+'px');
+    document.getElementById('res-left').style.top=tbH+'px';
+    drawRadar(scores);
+  });
+}
+
+function updateStickyLayout(){
+  /* left panel is position:fixed on desktop — nothing to compute.
+     On mobile it's relative, also nothing to compute.
+     We do need to re-draw the radar at current size. */
+  const scores={};MODULES.forEach(m=>scores[m.id]=0);
+  QUESTIONS.forEach(q=>{if(answers[q.id])scores[q.module]+=answers[q.id];});
+  drawRadar(scores);
+}
+
+/* desktop: toggle accordion; mobile: always open (CSS handles) */
+function toggleDim(id){
+  if(window.innerWidth>900){
+    document.getElementById('dim-'+id).classList.toggle('open');
+  }
+}
+
+/* ═══════════════════════════════
+   RADAR — HiDPI, labels+scores inside canvas
+═══════════════════════════════ */
+function drawRadar(scores){
+  const canvas=document.getElementById('radar-canvas');
+  if(!canvas)return;
+  const wrap=canvas.parentElement;
+  const dpr=window.devicePixelRatio||1;
+
+  /* Fit canvas to available space in the left panel.
+     On desktop, wrap has a real height (flex:1 in fixed panel).
+     Give labels generous padding so top label isn't clipped. */
+  const padH=20; // extra vertical breathing room
+  const availW=wrap.offsetWidth - 16;
+  const availH=wrap.offsetHeight ? wrap.offsetHeight - padH : availW;
+  const sz=Math.min(availW, availH);
+
+  canvas.width=sz*dpr;
+  canvas.height=sz*dpr;
+  canvas.style.width=sz+'px';
+  canvas.style.height=sz+'px';
+
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  const cx=sz/2, cy=sz/2;
+  /* label area: enough room for 2 lines of text (title + score) */
+  const labelPad=52;
+  const R=(sz/2)-labelPad;
+  const n=6;
+  const vals=MODULES.map(m=>(scores[m.id]||0)/25);
+
+  /* parchment background */
+  ctx.fillStyle='#F2EDE4';
+  ctx.fillRect(0,0,sz,sz);
+
+  /* rings */
+  for(let r=1;r<=5;r++){
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const a=(Math.PI*2*i/n)-Math.PI/2;
+      const rx=cx+(R*r/5)*Math.cos(a),ry=cy+(R*r/5)*Math.sin(a);
+      i===0?ctx.moveTo(rx,ry):ctx.lineTo(rx,ry);
+    }
+    ctx.closePath();
+    ctx.strokeStyle='rgba(120,113,108,0.18)';ctx.lineWidth=1;ctx.stroke();
+  }
+  /* spokes */
+  for(let i=0;i<n;i++){
+    const a=(Math.PI*2*i/n)-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));
+    ctx.strokeStyle='rgba(120,113,108,0.20)';ctx.lineWidth=1;ctx.stroke();
+  }
+  /* filled polygon */
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=(Math.PI*2*i/n)-Math.PI/2;
+    const px=cx+R*vals[i]*Math.cos(a),py=cy+R*vals[i]*Math.sin(a);
+    i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  ctx.closePath();
+  ctx.fillStyle='rgba(194,65,12,0.12)';ctx.fill();
+  ctx.strokeStyle='#C2410C';ctx.lineWidth=2;ctx.stroke();
+  /* dots */
+  MODULES.forEach((m,i)=>{
+    const a=(Math.PI*2*i/n)-Math.PI/2;
+    const px=cx+R*vals[i]*Math.cos(a),py=cy+R*vals[i]*Math.sin(a);
+    ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);
+    ctx.fillStyle=m.color;ctx.fill();
+  });
+  /* labels: title + score, placed just beyond the outer ring */
+  MODULES.forEach((m,i)=>{
+    const a=(Math.PI*2*i/n)-Math.PI/2;
+    const dist=R+labelPad*0.62;
+    const lx=cx+dist*Math.cos(a);
+    const ly=cy+dist*Math.sin(a);
+    const s=scores[m.id]||0;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font=`600 11.5px "DM Sans","Noto Sans SC",sans-serif`;
+    ctx.fillStyle=m.color;
+    ctx.fillText(m.title,lx,ly-7);
+    ctx.font=`400 9.5px "DM Sans","Noto Sans SC",sans-serif`;
+    ctx.fillStyle='rgba(68,64,60,0.7)';
+    ctx.fillText(`${s} / 25`,lx,ly+7);
+  });
+}
+
+/* ═══════════════════════════════
+   RESTART
+═══════════════════════════════ */
+function goHome(){
+  answers={};currentQ=0;
+  showScreen('welcome');
+}
+function restartQuiz(){
+  answers={};currentQ=0;
+  showScreen('quiz');renderModuleBar();renderQuestion();
+}
+
+/* ═══════════════════════════════
+   DOWNLOAD
+═══════════════════════════════ */
+function downloadResult(){
+  const btn=document.getElementById('btn-download');
+  btn.classList.add('loading');btn.textContent='生成中...';
+
+  const W=680;
+
+  /* open all dim cards */
+  const cards=document.querySelectorAll('.dim-card');
+  const wasOpen=[];cards.forEach(c=>{wasOpen.push(c.classList.contains('open'));c.classList.add('open');});
+
+  /* ── single-column capture container ── */
+  const wrap=document.createElement('div');
+  wrap.style.cssText=`position:fixed;top:-9999px;left:0;width:${W}px;background:#FAF7F2;z-index:9998;font-family:"DM Sans","Noto Sans SC",sans-serif;`;
+
+  /* 1. Score header */
+  const scoreHdr=document.getElementById('results-score-header').cloneNode(true);
+  scoreHdr.style.cssText='padding:1.4rem 1.8rem;background:#F2EDE4;border-bottom:1px solid #E8E0D4;';
+  wrap.appendChild(scoreHdr);
+
+  /* 2. Radar as image (captures canvas pixels) */
+  const srcCanvas=document.getElementById('radar-canvas');
+  const radarImg=document.createElement('img');
+  radarImg.src=srcCanvas.toDataURL('image/png');
+  radarImg.style.cssText='width:340px;height:auto;display:block;margin:1.5rem auto;';
+  wrap.appendChild(radarImg);
+
+  /* 3. Divider */
+  const div=document.createElement('div');
+  div.style.cssText='height:1px;background:#E8E0D4;margin:0 1.8rem;';
+  wrap.appendChild(div);
+
+  /* 4. Right panel content (总览 + 维度说明) */
+  const rightClone=document.getElementById('res-right').cloneNode(true);
+  rightClone.style.cssText='padding:1.8rem 1.8rem 3rem;overflow:visible;';
+  rightClone.querySelectorAll('.dim-body').forEach(b=>b.style.display='block');
+  wrap.appendChild(rightClone);
+
+  document.body.appendChild(wrap);
+
+  setTimeout(()=>{
+    html2canvas(wrap,{
+      backgroundColor:'#FAF7F2',scale:2,useCORS:true,logging:false,
+      width:W,windowWidth:W,
+    }).then(cv=>{
+      document.body.removeChild(wrap);
+      cards.forEach((c,i)=>{if(!wasOpen[i])c.classList.remove('open');});
+      const link=document.createElement('a');link.download='aiproof-result.png';link.href=cv.toDataURL('image/png');link.click();
+      btn.classList.remove('loading');
+      btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 下载结果`;
+      showToast('结果图已下载');
+    }).catch(()=>{
+      document.body.removeChild(wrap);
+      cards.forEach((c,i)=>{if(!wasOpen[i])c.classList.remove('open');});
+      btn.classList.remove('loading');
+      btn.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 下载结果`;
+      showToast('生成失败，请截图保存');
+    });
+  },400);
+}
+
+/* ═══════════════════════════════
+   TOAST + RESIZE
+═══════════════════════════════ */
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+window.addEventListener('resize',()=>{
+  if(!document.getElementById('screen-results').classList.contains('active'))return;
+  updateStickyLayout();
+  const s={};MODULES.forEach(m=>s[m.id]=0);QUESTIONS.forEach(q=>{if(answers[q.id])s[q.module]+=answers[q.id];});
+  drawRadar(s);
+});
+</script>
+</body>
+</html>
